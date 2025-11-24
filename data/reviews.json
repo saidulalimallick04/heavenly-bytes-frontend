@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "name": "Alice Johnson",
+    "rating": 5,
+    "comment": "Absolutely delicious! The cappuccino is the best I've ever had.",
+    "date": "2024-05-15T10:30:00Z"
+  },
+  {
+    "id": "2",
+    "name": "Bob Smith",
+    "rating": 4,
+    "comment": "Great atmosphere and friendly staff. The avocado toast was fresh and tasty.",
+    "date": "2024-05-16T14:15:00Z"
+  }
+]
