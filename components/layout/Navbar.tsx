@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, ShoppingBag, Search, Settings, Moon, Sun, LogIn, LayoutDashboard, DollarSign } from "lucide-react";
+import { Menu, X, ShoppingBag, Search, Settings, Moon, Sun, LogIn, LayoutDashboard, DollarSign, Home, UtensilsCrossed, Info, Phone, Laptop, IndianRupee, Euro, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
@@ -11,10 +11,10 @@ import { useTheme } from "next-themes";
 import { useCurrency } from "@/context/CurrencyContext";
 
 const navItems = [
-    { name: "Home", href: "/" },
-    { name: "Menu", href: "/menu" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
+    { name: "Home", href: "/", icon: Home },
+    { name: "Menu", href: "/menu", icon: UtensilsCrossed },
+    { name: "About", href: "/about", icon: Info },
+    { name: "Contact", href: "/contact", icon: Phone },
 ];
 
 export function Navbar() {
@@ -28,8 +28,10 @@ export function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
     const { theme, setTheme } = useTheme();
-    const { currency, toggleCurrency } = useCurrency();
+    const { currency, setCurrency } = useCurrency();
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isThemeExpanded, setIsThemeExpanded] = useState(true);
+    const [isCurrencyExpanded, setIsCurrencyExpanded] = useState(true);
 
     useEffect(() => {
         if (isSearchOpen && searchInputRef.current) {
@@ -81,10 +83,11 @@ export function Navbar() {
                             key={item.name}
                             href={item.href}
                             className={cn(
-                                "relative px-4 py-2 text-sm font-medium transition-colors hover:text-primary group",
+                                "relative px-4 py-2 text-sm font-medium transition-colors hover:text-primary group flex items-center gap-2",
                                 pathname === item.href ? "text-primary" : "text-muted-foreground"
                             )}
                         >
+                            <item.icon className="h-4 w-4" />
                             {item.name}
                             <span className={cn(
                                 "absolute inset-x-0 bottom-0 h-0.5 bg-primary transition-transform",
@@ -162,28 +165,120 @@ export function Navbar() {
                                     >
                                         <div className="space-y-1">
                                             {/* Theme Toggle */}
-                                            <button
-                                                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-accent transition-colors text-sm"
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    {theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                                                    Theme
-                                                </span>
-                                                <span className="text-xs font-medium text-muted-foreground capitalize">{theme === "system" ? "System" : theme}</span>
-                                            </button>
+                                            <div className="px-3 py-2">
+                                                <button
+                                                    onClick={() => setIsThemeExpanded(!isThemeExpanded)}
+                                                    className="w-full flex items-center justify-between mb-2 text-sm font-medium hover:text-primary transition-colors"
+                                                >
+                                                    <span className="flex items-center gap-2">
+                                                        <Sun className="h-4 w-4" />
+                                                        Theme
+                                                    </span>
+                                                    {isThemeExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                                                </button>
+
+                                                <AnimatePresence>
+                                                    {isThemeExpanded && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: "auto", opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div className="grid grid-cols-3 gap-1 bg-muted/50 p-1 rounded-lg">
+                                                                <button
+                                                                    onClick={() => setTheme("light")}
+                                                                    className={cn(
+                                                                        "flex items-center justify-center p-1.5 rounded-md transition-all",
+                                                                        theme === "light" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                    )}
+                                                                    title="Light"
+                                                                >
+                                                                    <Sun className="h-4 w-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setTheme("dark")}
+                                                                    className={cn(
+                                                                        "flex items-center justify-center p-1.5 rounded-md transition-all",
+                                                                        theme === "dark" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                    )}
+                                                                    title="Dark"
+                                                                >
+                                                                    <Moon className="h-4 w-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setTheme("system")}
+                                                                    className={cn(
+                                                                        "flex items-center justify-center p-1.5 rounded-md transition-all",
+                                                                        theme === "system" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                    )}
+                                                                    title="System"
+                                                                >
+                                                                    <Laptop className="h-4 w-4" />
+                                                                </button>
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
 
                                             {/* Currency Toggle */}
-                                            <button
-                                                onClick={toggleCurrency}
-                                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-accent transition-colors text-sm"
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    <DollarSign className="h-4 w-4" />
-                                                    Currency
-                                                </span>
-                                                <span className="text-xs font-bold text-muted-foreground">{currency}</span>
-                                            </button>
+                                            <div className="px-3 py-2">
+                                                <button
+                                                    onClick={() => setIsCurrencyExpanded(!isCurrencyExpanded)}
+                                                    className="w-full flex items-center justify-between mb-2 text-sm font-medium hover:text-primary transition-colors"
+                                                >
+                                                    <span className="flex items-center gap-2">
+                                                        <DollarSign className="h-4 w-4" />
+                                                        Currency
+                                                    </span>
+                                                    {isCurrencyExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                                                </button>
+
+                                                <AnimatePresence>
+                                                    {isCurrencyExpanded && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: "auto", opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div className="grid grid-cols-3 gap-1 bg-muted/50 p-1 rounded-lg">
+                                                                <button
+                                                                    onClick={() => setCurrency("INR")}
+                                                                    className={cn(
+                                                                        "flex items-center justify-center p-1.5 rounded-md transition-all",
+                                                                        currency === "INR" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                    )}
+                                                                    title="INR"
+                                                                >
+                                                                    <IndianRupee className="h-4 w-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setCurrency("USD")}
+                                                                    className={cn(
+                                                                        "flex items-center justify-center p-1.5 rounded-md transition-all",
+                                                                        currency === "USD" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                    )}
+                                                                    title="USD"
+                                                                >
+                                                                    <DollarSign className="h-4 w-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setCurrency("EUR")}
+                                                                    className={cn(
+                                                                        "flex items-center justify-center p-1.5 rounded-md transition-all",
+                                                                        currency === "EUR" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                    )}
+                                                                    title="EUR"
+                                                                >
+                                                                    <Euro className="h-4 w-4" />
+                                                                </button>
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
 
                                             <div className="h-px bg-border my-1" />
 
@@ -269,7 +364,10 @@ export function Navbar() {
                                                 )}
                                                 onClick={() => setIsOpen(false)}
                                             >
-                                                {item.name}
+                                                <span className="flex items-center gap-3">
+                                                    <item.icon className="h-5 w-5" />
+                                                    {item.name}
+                                                </span>
                                                 {isActive && (
                                                     <motion.div
                                                         layoutId="activeNav"
@@ -302,27 +400,119 @@ export function Navbar() {
                                     </Link>
 
                                     <div className="pt-4 mt-2 border-t border-border/50 space-y-2">
-                                        <button
-                                            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                                            className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors"
-                                        >
-                                            <span className="flex items-center gap-3">
-                                                {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-                                                Theme
-                                            </span>
-                                            <span className="text-sm text-muted-foreground capitalize">{theme === "system" ? "System" : theme}</span>
-                                        </button>
+                                        <div className="px-4 py-2">
+                                            <button
+                                                onClick={() => setIsThemeExpanded(!isThemeExpanded)}
+                                                className="w-full flex items-center justify-between mb-3 text-base font-medium"
+                                            >
+                                                <span className="flex items-center gap-3">
+                                                    <Sun className="h-5 w-5" />
+                                                    Theme
+                                                </span>
+                                                {isThemeExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                            </button>
 
-                                        <button
-                                            onClick={toggleCurrency}
-                                            className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors"
-                                        >
-                                            <span className="flex items-center gap-3">
-                                                <DollarSign className="h-5 w-5" />
-                                                Currency
-                                            </span>
-                                            <span className="text-sm font-bold text-muted-foreground">{currency}</span>
-                                        </button>
+                                            <AnimatePresence>
+                                                {isThemeExpanded && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: "auto", opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        className="overflow-hidden"
+                                                    >
+                                                        <div className="grid grid-cols-3 gap-2 bg-muted/50 p-1.5 rounded-xl">
+                                                            <button
+                                                                onClick={() => setTheme("light")}
+                                                                className={cn(
+                                                                    "flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all",
+                                                                    theme === "light" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                <Sun className="h-5 w-5" />
+                                                                <span className="text-[10px] font-medium">Light</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setTheme("dark")}
+                                                                className={cn(
+                                                                    "flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all",
+                                                                    theme === "dark" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                <Moon className="h-5 w-5" />
+                                                                <span className="text-[10px] font-medium">Dark</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setTheme("system")}
+                                                                className={cn(
+                                                                    "flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all",
+                                                                    theme === "system" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                <Laptop className="h-5 w-5" />
+                                                                <span className="text-[10px] font-medium">System</span>
+                                                            </button>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+
+                                        <div className="px-4 py-2">
+                                            <button
+                                                onClick={() => setIsCurrencyExpanded(!isCurrencyExpanded)}
+                                                className="w-full flex items-center justify-between mb-3 text-base font-medium"
+                                            >
+                                                <span className="flex items-center gap-3">
+                                                    <DollarSign className="h-5 w-5" />
+                                                    Currency
+                                                </span>
+                                                {isCurrencyExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                            </button>
+
+                                            <AnimatePresence>
+                                                {isCurrencyExpanded && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: "auto", opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        className="overflow-hidden"
+                                                    >
+                                                        <div className="grid grid-cols-3 gap-2 bg-muted/50 p-1.5 rounded-xl">
+                                                            <button
+                                                                onClick={() => setCurrency("INR")}
+                                                                className={cn(
+                                                                    "flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all",
+                                                                    currency === "INR" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                <IndianRupee className="h-5 w-5" />
+                                                                <span className="text-[10px] font-medium">INR</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setCurrency("USD")}
+                                                                className={cn(
+                                                                    "flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all",
+                                                                    currency === "USD" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                <DollarSign className="h-5 w-5" />
+                                                                <span className="text-[10px] font-medium">USD</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setCurrency("EUR")}
+                                                                className={cn(
+                                                                    "flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all",
+                                                                    currency === "EUR" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                <Euro className="h-5 w-5" />
+                                                                <span className="text-[10px] font-medium">EUR</span>
+                                                            </button>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
 
                                         <Link
                                             href={isAdmin ? "/admin/dashboard" : "/admin/login"}

@@ -2,45 +2,65 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-type Currency = "INR" | "USD";
+export type Currency = "INR" | "USD" | "EUR";
 
 interface CurrencyContextType {
     currency: Currency;
-    toggleCurrency: () => void;
+    setCurrency: (currency: Currency) => void;
+    toggleCurrency: () => void; // Kept for backward compatibility if needed, but setCurrency is preferred
     formatPrice: (priceInUsd: number) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-const EXCHANGE_RATE = 89;
+const EXCHANGE_RATES = {
+    INR: 89,
+    EUR: 0.92,
+    USD: 1,
+};
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-    const [currency, setCurrency] = useState<Currency>("INR");
+    const [currency, setCurrencyState] = useState<Currency>("INR");
 
     useEffect(() => {
         const savedCurrency = localStorage.getItem("currency") as Currency;
-        if (savedCurrency) {
-            setCurrency(savedCurrency);
+        if (savedCurrency && ["INR", "USD", "EUR"].includes(savedCurrency)) {
+            setCurrencyState(savedCurrency);
         }
     }, []);
 
-    const toggleCurrency = () => {
-        const newCurrency = currency === "INR" ? "USD" : "INR";
-        setCurrency(newCurrency);
+    const setCurrency = (newCurrency: Currency) => {
+        setCurrencyState(newCurrency);
         localStorage.setItem("currency", newCurrency);
     };
 
+    const toggleCurrency = () => {
+        // Cycle through currencies: INR -> USD -> EUR -> INR
+        const nextCurrency: Record<Currency, Currency> = {
+            INR: "USD",
+            USD: "EUR",
+            EUR: "INR",
+        };
+        setCurrency(nextCurrency[currency]);
+    };
+
     const formatPrice = (priceInUsd: number): string => {
-        if (currency === "USD") {
-            return `$${priceInUsd.toFixed(2)}`;
-        } else {
-            const priceInInr = priceInUsd * EXCHANGE_RATE;
-            return `₹${Math.round(priceInInr)}`;
+        const rate = EXCHANGE_RATES[currency];
+        const convertedPrice = priceInUsd * rate;
+
+        switch (currency) {
+            case "USD":
+                return `$${convertedPrice.toFixed(2)}`;
+            case "EUR":
+                return `€${convertedPrice.toFixed(2)}`;
+            case "INR":
+            default:
+                return `₹${Math.round(convertedPrice)}`;
         }
     };
 
     return (
-        <CurrencyContext.Provider value={{ currency, toggleCurrency, formatPrice }}>
+        <CurrencyContext.Provider value={{ currency, setCurrency, toggleCurrency, formatPrice }}>
             {children}
         </CurrencyContext.Provider>
     );
